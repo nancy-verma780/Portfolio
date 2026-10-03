@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0d0e14;
+  --color-ink-2: #151722;
+  --color-ink-3: #1c1f2c;
+  --color-line: #252836;
+  --color-paper: #ece9f1;
+  --color-mist: #9b9aae;
+  --color-dim: #6c6b80;
+  --color-violet: #9d8cff;
+  --color-rose: #ee8db9;
+  --color-apricot: #f4c28c;
+
+  --font-display: var(--font-bricolage), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-deva: var(--font-devanagari), var(--font-bricolage), sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  --wash: linear-gradient(100deg, var(--color-violet) 0%, var(--color-rose) 55%, var(--color-apricot) 100%);
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: color-mix(in oklab, var(--color-rose) 40%, transparent); color: var(--color-paper); }
+
+:focus-visible {
+  outline: 2px solid var(--color-apricot);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Text painted with the wash. Used sparingly. */
+.text-wash {
+  background: var(--wash);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hairline that turns into the wash on hover/focus. */
+.wash-border {
+  position: relative;
+  isolation: isolate;
+}
+.wash-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--wash);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 400ms var(--ease-out-soft);
+  pointer-events: none;
+  z-index: 1;
+}
+.wash-border:hover::before,
+.wash-border:focus-within::before { opacity: 1; }
+
+/* Subtle paper grain over the whole page, static (no repaint cost). */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Slow drift for the hero wash. Transform-only, so it stays on the compositor. */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, -3%, 0) scale(1.06); }
+}
+.animate-drift { animation: drift 22s ease-in-out infinite; }
+
+dialog::backdrop { background: rgb(5 6 10 / 0.72); backdrop-filter: blur(6px); }
+dialog { color: inherit; }
+
+/* Project schematics: resting state, then "on" when the card is hovered,
+   inside the detail dialog, or on touch screens where hover doesn't exist. */
+[data-draw] { stroke-dasharray: 120; stroke-dashoffset: 120; transition: stroke-dashoffset 700ms var(--ease-out-soft); }
+[data-flow] { opacity: .5; transition: opacity 500ms; }
+[data-glow] { opacity: .6; transition: opacity 500ms; }
+[data-slide] { transition: transform 700ms var(--ease-out-soft); }
+@keyframes flow { to { stroke-dashoffset: -24; } }
+
+.group:hover [data-draw], [data-vis-active] [data-draw] { stroke-dashoffset: 0; }
+.group:hover [data-flow], [data-vis-active] [data-flow] { opacity: 1; animation: flow 1.2s linear infinite; }
+.group:hover [data-glow], [data-vis-active] [data-glow] { opacity: 1; }
+.group:hover [data-slide] { transform: translateX(-24px); }
+
+@media (hover: none) {
+  [data-draw] { stroke-dashoffset: 0; }
+  [data-flow], [data-glow] { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-draw] { stroke-dashoffset: 0; }
+  [data-flow] { animation: none !important; }
+  .group:hover [data-slide] { transform: none; }
+}
+@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }

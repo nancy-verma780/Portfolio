@@ -11,7 +11,7 @@ import { profile } from "@/data/profile";
  * Without a key the form still works: it opens the visitor's email app,
  * pre-filled and addressed to you, so nothing is ever silently lost.
  */
-const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
+const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY || '19c01f96-8619-47fc-b3ee-97123bda30f2';
 
 const TOPICS = ["Internship or job", "Collaboration", "Hackathon team", "Just saying hi"];
 
